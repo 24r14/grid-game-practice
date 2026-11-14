@@ -1,0 +1,29 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function demoOpen() {
+      return request.time < timestamp.date(2026, 11, 20);
+    }
+    match /users/player1 {
+      allow get: if demoOpen();
+      allow update: if demoOpen()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['score'])
+        && request.resource.data.score is int && request.resource.data.score >= 0;
+    }
+    match /leaderboard/{player} {
+      function validScore() {
+        return request.resource.data.keys().hasAll(['username', 'score'])
+          && request.resource.data.keys().hasOnly(['username', 'score'])
+          && request.resource.data.username is string
+          && request.resource.data.username.matches('[A-Za-z0-9_]{1,16}')
+          && player == request.resource.data.username.lower()
+          && request.resource.data.score is int && request.resource.data.score >= 0;
+      }
+      allow get: if demoOpen();
+      allow list: if demoOpen() && request.query.limit <= 3;
+      allow create: if demoOpen() && validScore();
+      allow update: if demoOpen() && validScore()
+        && request.resource.data.score >= resource.data.score;
+    }
+  }
+}

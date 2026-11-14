@@ -1,0 +1,20 @@
+plugins { id 'application' }
+repositories { mavenCentral() }
+java { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+application { mainClass = 'io.grid.practice.Lwjgl3Launcher' }
+dependencies {
+    implementation 'com.badlogicgames.gdx:gdx:1.14.2'
+    implementation 'com.badlogicgames.gdx:gdx-backend-lwjgl3:1.14.2'
+    implementation 'com.badlogicgames.gdx:gdx-platform:1.14.2:natives-desktop'
+}
+run {
+    jvmArgs '--enable-native-access=ALL-UNNAMED'
+    if (System.getProperty('os.name').toLowerCase().contains('mac')) jvmArgs '-XstartOnFirstThread'
+}
+tasks.register('gameChecks', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'io.grid.practice.GameChecks'
+}
+tasks.named('check') { dependsOn 'gameChecks' }
