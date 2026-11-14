@@ -2,7 +2,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     function demoOpen() {
-      return request.time < timestamp.date(2026, 11, 20);
+      return request.time < timestamp.date(2027, 7, 1);
     }
     match /users/player1 {
       allow get: if demoOpen();
